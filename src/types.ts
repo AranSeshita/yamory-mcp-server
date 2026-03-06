@@ -98,6 +98,26 @@ export interface HostVuln {
   yamoryVuln: string;
 }
 
+export interface AssetVuln {
+  id: string;
+  triageLevel: string;
+  status: string;
+  vulnTypes: string;
+  teamName: string;
+  projectName: string;
+  assetName: string;
+  version: string;
+  referenceId: string;
+  assetIdentifier: string;
+  openSystem: boolean;
+  hasPoc: boolean;
+  isKev: boolean;
+  openTimestamp: string;
+  closedTimestamp: string | null;
+  scanTimestamp: string;
+  yamoryVuln: string;
+}
+
 export interface ImageVulnSearchParams extends VulnSearchParams {
   yamoryTags?: string;
 }

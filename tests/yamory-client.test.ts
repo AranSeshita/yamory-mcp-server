@@ -139,6 +139,22 @@ describe("YamoryClient", () => {
     });
   });
 
+  describe("searchAssetVulns", () => {
+    it("sends request to asset-vulns endpoint", async () => {
+      const mockFetch = createMockFetch([]);
+      const client = new YamoryClient({
+        apiToken: "tok",
+        fetchFn: mockFetch,
+      });
+
+      await client.searchAssetVulns({ keyword: "FortiGate" });
+
+      const url = new URL(mockFetch.mock.calls[0][0]);
+      expect(url.pathname).toBe("/v1/asset-vulns");
+      expect(url.searchParams.get("keyword")).toBe("FortiGate");
+    });
+  });
+
   describe("searchHostVulns", () => {
     it("sends request to host-vulns endpoint", async () => {
       const mockFetch = createMockFetch([]);

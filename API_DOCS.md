@@ -194,15 +194,62 @@ pageNumber: integer     // 現在のページ番号（0始まり）
 
 ---
 
-## アプリ vs コンテナ vs ホスト 差分まとめ
+## 4. IT資産の脆弱性情報一覧
 
-| 項目 | アプリ (`/v1/app-vulns`) | コンテナ (`/v1/image-vulns`) | ホスト (`/v1/host-vulns`) |
-|------|------------------------|---------------------------|--------------------------|
-| keyword対象 | PJグループ、PJ名、グループID等 | ソフトウェア名、バージョン、CVE番号 | ソフトウェア名、バージョン、ホスト名 |
-| 固有パラメータ | — | `yamoryTags` | `yamoryTags` |
-| スコープフィルタキー | `teamName` + `projectGroupKey` | `teamName` のみ | `teamName` のみ |
-| パッケージ名 | `packageName` | `packageNameAndVer`（バージョン含む） | `packageNameAndVer`（バージョン含む） |
-| 修正バージョン | `solution` に含まれる | `fixedVersion` フィールドあり | `fixedVersion` フィールドあり |
-| CVE-ID | `referenceId` | `ovalTitle` に含まれる | `ovalTitle` に含まれる |
-| triageLevelの大文字小文字 | `IMMEDIATE` | `Immediate` | `IMMEDIATE` |
-| 固有情報 | `projectGroupKey`, `projectName` | `imageName`, `imageTitle`, `osFamilyAndVer`, `family` | `hostName`, `hostTitle`, `hostIps`, `hostTags`, `osFamilyAndVer`, `family` |
+`GET /v1/asset-vulns`
+
+### クエリパラメータ
+
+| パラメータ | 型 | 内容 |
+|-----------|-----|------|
+| keyword | string | プロジェクトグループ、プロジェクト名、IT資産名、脆弱性ID、管理番号に部分一致 |
+| triageLevel | string | `immediate`, `delayed`, `minor`, `none`（カンマ区切り複数可） |
+| status | string | `open`, `in_progress`, `wont_fix_closed`, `not_vuln_closed`, `closed`（カンマ区切り複数可） |
+| includeKev | boolean | CISA KEV該当のみ |
+| includePoc | boolean | PoC存在のみ |
+| cvssScore | string | 指定値以上（0〜10.0） |
+| vulnType | string | アプリ・コンテナ・ホストと同じ値 |
+| openTimestamp | datetime | 指定日時以降に検出 |
+| page | integer | ページ番号（0始まり） |
+| size | integer | 1ページの件数（最大10,000） |
+
+### レスポンス
+
+```json
+[{
+  "id": "string",                  // 脆弱性ID（yamory内で一意）
+  "triageLevel": "string",        // Delayed 等 ※大文字小文字注意
+  "status": "string",             // OPEN, IN_PROGRESS, etc.
+  "vulnTypes": "string",          // 脆弱性タイプ
+  "teamName": "string",           // チーム名 ★スコープフィルタ対象
+  "projectName": "string",        // プロジェクト名
+  "assetName": "string",          // IT資産名（例: "FortiGate 300E"）
+  "version": "string",            // バージョン
+  "referenceId": "string",        // CVE-ID
+  "assetIdentifier": "string",    // 管理番号
+  "openSystem": true,             // 公開設定
+  "hasPoc": true,                 // PoC有無
+  "isKev": true,                  // CISA KEV該当
+  "openTimestamp": "datetime",    // 検出日時
+  "closedTimestamp": "datetime",  // 完了日時
+  "scanTimestamp": "datetime",    // 最終スキャン日時
+  "yamoryVuln": "string"          // 脆弱性詳細URL
+}]
+```
+
+※ IT資産にはアプリ・コンテナ・ホストにある `solution` / `fixedVersion` フィールドがない。対応方法は `yamoryVuln` URLから詳細を参照する必要がある。
+
+---
+
+## アプリ vs コンテナ vs ホスト vs IT資産 差分まとめ
+
+| 項目 | アプリ (`/v1/app-vulns`) | コンテナ (`/v1/image-vulns`) | ホスト (`/v1/host-vulns`) | IT資産 (`/v1/asset-vulns`) |
+|------|------------------------|---------------------------|--------------------------|--------------------------|
+| keyword対象 | PJグループ、PJ名、グループID等 | ソフトウェア名、バージョン、CVE番号 | ソフトウェア名、バージョン、ホスト名 | PJグループ、PJ名、IT資産名、脆弱性ID、管理番号 |
+| 固有パラメータ | — | `yamoryTags` | `yamoryTags` | — |
+| スコープフィルタキー | `teamName` + `projectGroupKey` | `teamName` のみ | `teamName` のみ | `teamName` のみ |
+| パッケージ名 | `packageName` | `packageNameAndVer` | `packageNameAndVer` | `assetName` + `version` |
+| 修正バージョン | `solution` に含まれる | `fixedVersion` あり | `fixedVersion` あり | なし（`yamoryVuln` 参照） |
+| CVE-ID | `referenceId` | `ovalTitle` に含まれる | `ovalTitle` に含まれる | `referenceId` |
+| triageLevelの大文字小文字 | `IMMEDIATE` | `Immediate` | `IMMEDIATE` | `Delayed` ※要確認 |
+| 固有情報 | `projectGroupKey`, `projectName` | `imageName`, `imageTitle`, `osFamilyAndVer`, `family` | `hostName`, `hostTitle`, `hostIps`, `hostTags`, `osFamilyAndVer`, `family` | `assetName`, `version`, `assetIdentifier`, `projectName` |

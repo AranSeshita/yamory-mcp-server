@@ -1,5 +1,6 @@
 import type {
   AppVuln,
+  AssetVuln,
   HostVuln,
   HostVulnSearchParams,
   ImageVuln,
@@ -38,6 +39,12 @@ export class YamoryClient {
     params: HostVulnSearchParams = {}
   ): Promise<SearchResult<HostVuln>> {
     return this.searchWithTags<HostVuln>("/v1/host-vulns", params);
+  }
+
+  async searchAssetVulns(
+    params: VulnSearchParams = {}
+  ): Promise<SearchResult<AssetVuln>> {
+    return this.search<AssetVuln>("/v1/asset-vulns", params);
   }
 
   private async searchWithTags<T>(

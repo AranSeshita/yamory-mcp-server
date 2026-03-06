@@ -98,6 +98,7 @@ export function createServer(deps: {
         "- Use triageLevel=immediate,delayed and status=open to focus on actionable vulnerabilities.",
         "- Search both app library (search_app_vulns) and container image (search_container_vulns) vulnerabilities.",
         "- Search host (search_host_vulns) vulnerabilities when the user asks about host or OS-level vulnerabilities.",
+        "- Search IT asset (search_asset_vulns) vulnerabilities when the user asks about IT assets (e.g., network devices, appliances).",
         "- If the user explicitly specifies filters, respect their request and override the defaults.",
       ].join("\n"),
     }
@@ -132,6 +133,21 @@ export function createServer(deps: {
     },
     async (params) => {
       const result = await yamoryClient.searchImageVulns(params);
+      result.items = filterByScope(result.items, config.teamName);
+      return {
+        content: [{ type: "text", text: formatSearchResult(result) }],
+      };
+    }
+  );
+
+  server.registerTool(
+    "search_asset_vulns",
+    {
+      description: "Search IT asset vulnerabilities detected by yamory. Returns triage level, status, affected asset/version, CVE-ID, and detail URL. Note: solution/fixedVersion are not available — refer to the yamoryVuln URL for remediation details. Results are scoped to the configured team.",
+      inputSchema: vulnSearchSchema,
+    },
+    async (params) => {
+      const result = await yamoryClient.searchAssetVulns(params);
       result.items = filterByScope(result.items, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],

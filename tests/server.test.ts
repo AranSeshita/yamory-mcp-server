@@ -25,6 +25,15 @@ function createMockClient(overrides?: Partial<YamoryClient>): YamoryClient {
         pageNumber: 0,
       },
     }),
+    searchAssetVulns: vi.fn().mockResolvedValue({
+      items: [],
+      pagination: {
+        pageSize: 100,
+        totalElements: 0,
+        totalPages: 0,
+        pageNumber: 0,
+      },
+    }),
     searchHostVulns: vi.fn().mockResolvedValue({
       items: [],
       pagination: {
@@ -58,12 +67,13 @@ async function setupTestServer(
 
 describe("MCP Server", () => {
   describe("tool listing", () => {
-    it("exposes all three vulnerability search tools", async () => {
+    it("exposes all four vulnerability search tools", async () => {
       const { client } = await setupTestServer(createMockClient());
       const { tools } = await client.listTools();
       const names = tools.map((t) => t.name);
       expect(names).toContain("search_app_vulns");
       expect(names).toContain("search_container_vulns");
+      expect(names).toContain("search_asset_vulns");
       expect(names).toContain("search_host_vulns");
     });
   });
@@ -192,6 +202,58 @@ describe("MCP Server", () => {
           yamoryTags: "prod",
         })
       );
+    });
+  });
+
+  describe("search_asset_vulns", () => {
+    it("calls searchAssetVulns with params", async () => {
+      const searchAssetVulns = vi.fn().mockResolvedValue({
+        items: [],
+        pagination: {
+          pageSize: 100,
+          totalElements: 0,
+          totalPages: 0,
+          pageNumber: 0,
+        },
+      });
+      const mockYamory = createMockClient({ searchAssetVulns });
+
+      const { client } = await setupTestServer(mockYamory);
+      await client.callTool({
+        name: "search_asset_vulns",
+        arguments: { keyword: "FortiGate" },
+      });
+
+      expect(searchAssetVulns).toHaveBeenCalledWith(
+        expect.objectContaining({ keyword: "FortiGate" })
+      );
+    });
+
+    it("filters results by team scope", async () => {
+      const searchAssetVulns = vi.fn().mockResolvedValue({
+        items: [
+          { id: "1", teamName: "TestTeam", assetName: "FortiGate 300E" },
+          { id: "2", teamName: "OtherTeam", assetName: "Cisco ASA" },
+        ],
+        pagination: {
+          pageSize: 100,
+          totalElements: 2,
+          totalPages: 1,
+          pageNumber: 0,
+        },
+      });
+      const mockYamory = createMockClient({ searchAssetVulns });
+
+      const { client } = await setupTestServer(mockYamory, "TestTeam");
+      const result = await client.callTool({
+        name: "search_asset_vulns",
+        arguments: {},
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const parsed = JSON.parse(content[0].text);
+      expect(parsed.items).toHaveLength(1);
+      expect(parsed.items[0].assetName).toBe("FortiGate 300E");
     });
   });
 
