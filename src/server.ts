@@ -92,13 +92,12 @@ export function createServer(deps: {
   const server = new McpServer(
     { name: "yamory-mcp-server", version: "1.0.0" },
     {
-      instructions: [
+     instructions: [
         "You are connected to yamory, a vulnerability management platform.",
         "Default behavior when the user asks about vulnerabilities without specific filters:",
-        "- Use triageLevel=immediate,delayed to focus on actionable vulnerabilities.",
-        "- Also make a separate call with includeKev=true to catch any CISA KEV vulnerabilities regardless of triage level.",
-        "- Use status=open to show only unresolved vulnerabilities.",
-        "- If the user explicitly specifies filters (e.g. 'show me minor ones', 'all statuses'), respect their request and override the defaults.",
+        "- Use triageLevel=immediate,delayed and status=open to focus on actionable vulnerabilities.",
+        "- Search both app library (search_app_vulns) and container image (search_container_vulns) vulnerabilities.",
+        "- If the user explicitly specifies filters, respect their request and override the defaults.",
       ].join("\n"),
     }
   );
