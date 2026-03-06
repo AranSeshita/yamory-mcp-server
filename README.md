@@ -310,28 +310,21 @@ yamory-mcp-server/
 
 ## Roadmap
 
-### v1 (Current)
+### v1 (Current) ✅
 - [x] App library vulnerability search
+- [x] Container image vulnerability search
 - [x] Scope filter (token-based / team / project group / organization-wide)
+- [x] Server Instructions
 - [x] npm publish / npx support
 - [x] GitHub Actions CI / Docker image on ghcr.io
-- [ ] Container image vulnerability search
-- [ ] Server Instructions
 
 ### v2
-- [ ] Vulnerability detail via `yamoryVuln` URL
-- [ ] Critical vulnerability summary
-- [ ] Resources (`yamory://cves/{cveId}`, `yamory://cves/{cveId}/pocs`)
-- [ ] Prompts (`fix-vulns`, `vuln-report`, `check-cve`)
-- [ ] Project group listing & detail
+- [ ] CVE detail tool (`get_cve`)
+- [ ] CSPM endpoints
+- [ ] Host vulnerability endpoints
 - [ ] Software listing & detail
 - [ ] Container image listing & detail
 - [ ] IT asset endpoints
-
-### Future
-- [ ] Host vulnerability endpoints
-- [ ] CSPM endpoints
-- [ ] README English version
 
 ---
 
