@@ -5,7 +5,7 @@
 Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerability management cloud. Enables AI agents and assistants to use yamory as a knowledge base for vulnerability remediation — providing **what's detected, how dangerous it is, and how to fix it**.
 
 - **Vulnerability Search & Triage**: Search app library and container image vulnerabilities by keyword, triage level, status, CVSS score, vulnerability type, CISA KEV, and PoC availability.
-- **Scope-Based Access Control**: Restrict API responses to a specific team via environment variables, or use `*` for organization-wide access.
+- **Scope-Based Access Control**: Team tokens automatically restrict data. Security team tokens can be further filtered by team name or used organization-wide.
 - **Works with any MCP client**: Claude Code, Claude Desktop, Cursor, VS Code, and more.
 
 ---
@@ -22,8 +22,7 @@ Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerabili
 ```bash
 claude mcp add yamory \
   --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
-  --env YAMORY_TEAM_NAME=your_team \
-  -- docker run -i --rm -e YAMORY_API_TOKEN -e YAMORY_TEAM_NAME ghcr.io/your-org/yamory-mcp-server
+  -- docker run -i --rm -e YAMORY_API_TOKEN ghcr.io/your-org/yamory-mcp-server
 ```
 
 ### Claude Desktop
@@ -38,12 +37,10 @@ Add to `claude_desktop_config.json`:
       "args": [
         "run", "-i", "--rm",
         "-e", "YAMORY_API_TOKEN",
-        "-e", "YAMORY_TEAM_NAME",
         "ghcr.io/your-org/yamory-mcp-server"
       ],
       "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>",
-        "YAMORY_TEAM_NAME": "<YOUR_TEAM>"
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
       }
     }
   }
@@ -63,12 +60,10 @@ Add to `.cursor/mcp.json`:
       "args": [
         "run", "-i", "--rm",
         "-e", "YAMORY_API_TOKEN",
-        "-e", "YAMORY_TEAM_NAME",
         "ghcr.io/your-org/yamory-mcp-server"
       ],
       "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>",
-        "YAMORY_TEAM_NAME": "<YOUR_TEAM>"
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
       }
     }
   }
@@ -89,18 +84,18 @@ Add to `.vscode/mcp.json`:
       "args": [
         "run", "-i", "--rm",
         "-e", "YAMORY_API_TOKEN",
-        "-e", "YAMORY_TEAM_NAME",
         "ghcr.io/your-org/yamory-mcp-server"
       ],
       "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>",
-        "YAMORY_TEAM_NAME": "<YOUR_TEAM>"
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
       }
     }
   }
 }
 ```
 </details>
+
+> **Security team tokens**: Add `-e YAMORY_TEAM_NAME` to args and `"YAMORY_TEAM_NAME": "<TEAM>"` to env to filter by team, or set `*` for organization-wide access.
 
 ---
 
@@ -152,10 +147,13 @@ When a critical CVE is disclosed, immediately assess impact across your team's p
 ## Architecture
 
 ```mermaid
-graph LR
-    A[MCP Client<br>Claude Code,<br>Claude Desktop,<br>Cursor, etc.] -->|MCP| B[yamory MCP Server<br>- Scope Filter<br>- Tools<br>- Server Instructions]
-    B -->|REST| C[yamory API<br>yamoryapi.yamory.io]
+flowchart LR
+    A[MCP Client] -- MCP --> B[yamory MCP Server] -- REST --> C[yamory API]
 ```
+
+**MCP Client**: Claude Code, Claude Desktop, Cursor, etc.
+**yamory MCP Server**: Scope Filter, Tools, Server Instructions
+**yamory API**: yamoryapi.yamory.io
 
 ---
 
@@ -203,7 +201,40 @@ Search container image vulnerabilities with filters. Same scope filtering as `se
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `YAMORY_API_TOKEN` | **Yes** | — | API access token from yamory team settings. |
-| `YAMORY_TEAM_NAME` | **Yes** | — | Target team name (exact match). Set `*` for organization-wide access. |
+| `YAMORY_TEAM_NAME` | No | — | Filter by team name. If unset, the token's own scope applies. Set `*` to explicitly allow all teams (for security team tokens). |
+| `YAMORY_PROJECT_GROUPS` | No | All | Comma-separated project group keys to restrict scope. |
+
+---
+
+## Scope Filter
+
+yamory API tokens issued per team automatically restrict data to that team. The MCP server adds an optional additional filter layer.
+
+```
+yamory API Response (already scoped by token)
+  │
+  ├─ YAMORY_TEAM_NAME unset?
+  │   └─ YES → Return as-is (token scope only)
+  │
+  ├─ YAMORY_TEAM_NAME = * ?
+  │   └─ YES → Return as-is (explicit organization-wide)
+  │
+  ├─ teamName === YAMORY_TEAM_NAME ?
+  │   ├─ YES → YAMORY_PROJECT_GROUPS set?
+  │   │         ├─ YES → projectGroupKey in list? → Return / Drop
+  │   │         └─ NO  → Return
+  │   └─ NO  → Drop
+  │
+  └─ Paging info is recalculated after filtering
+```
+
+**Typical configurations:**
+
+| Scenario | Token | YAMORY_TEAM_NAME | Result |
+|----------|-------|------------------|--------|
+| Developer | Team token | (unset) | Team data only (token-scoped) |
+| Security lead, specific team | Security team token | `開発チーム` | Filtered to one team |
+| Security lead, org-wide | Security team token | `*` | All teams visible |
 
 ---
 
@@ -213,7 +244,7 @@ Search container image vulnerabilities with filters. Same scope filtering as `se
 
 - **Never commit tokens** to version control.
 - **Use environment variables** — avoid hardcoding tokens in command-line arguments.
-- **Restrict scope** — always set `YAMORY_TEAM_NAME` to limit data exposure. Use `*` only when organization-wide access is intentional.
+- **Restrict scope** — for security team tokens, set `YAMORY_TEAM_NAME` to limit data exposure. Use `*` only when organization-wide access is intentional.
 - **Rotate tokens** periodically from yamory's team settings.
 
 ---
@@ -277,7 +308,7 @@ yamory-mcp-server/
 
 ### v1 (Current)
 - [x] App library vulnerability search
-- [x] Scope filter (team / project group / organization-wide)
+- [x] Scope filter (token-based / team / project group / organization-wide)
 - [x] GitHub Actions CI / Release to ghcr.io
 - [ ] Container image vulnerability search
 - [ ] Server Instructions
