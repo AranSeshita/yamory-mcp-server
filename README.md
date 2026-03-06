@@ -1,0 +1,1 @@
+# yamory-mcp-server
