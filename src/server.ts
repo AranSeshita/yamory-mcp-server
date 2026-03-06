@@ -102,10 +102,12 @@ export function createServer(deps: {
     }
   );
 
-  server.tool(
+  server.registerTool(
     "search_app_vulns",
-    "Search app library vulnerabilities detected by yamory. Returns triage level, status, affected package, solution, and CVE information. Results are scoped to the configured team.",
-    vulnSearchSchema,
+    {
+      description: "Search app library vulnerabilities detected by yamory. Returns triage level, status, affected package, solution, and CVE information. Results are scoped to the configured team.",
+      inputSchema: vulnSearchSchema,
+    },
     async (params) => {
       const result = await yamoryClient.searchAppVulns(params);
       result.items = filterByScope(result.items, config.teamName);
@@ -115,15 +117,17 @@ export function createServer(deps: {
     }
   );
 
-  server.tool(
+  server.registerTool(
     "search_container_vulns",
-    "Search container image vulnerabilities detected by yamory. Returns triage level, status, affected image/package, solution, and advisory information. Results are scoped to the configured team.",
     {
-      ...vulnSearchSchema,
-      yamoryTags: z
-        .string()
-        .optional()
-        .describe("Comma-separated management tags"),
+      description: "Search container image vulnerabilities detected by yamory. Returns triage level, status, affected image/package, solution, and advisory information. Results are scoped to the configured team.",
+      inputSchema: {
+        ...vulnSearchSchema,
+        yamoryTags: z
+          .string()
+          .optional()
+          .describe("Comma-separated management tags"),
+      },
     },
     async (params) => {
       const result = await yamoryClient.searchImageVulns(params);

@@ -1,8 +1,7 @@
 # yamory MCP Server (Unofficial)
 
 [![npm version](https://img.shields.io/npm/v/@aranseshita/yamory-mcp-server?cacheSeconds=300)](https://www.npmjs.com/package/@aranseshita/yamory-mcp-server)
-[![npm downloads](https://img.shields.io/npm/dm/@aranseshita/yamory-mcp-server?cacheSeconds=300)](https://www.npmjs.com/package/@aranseshita/yamory-mcp-server)
-[![License: MIT](https://img.shields.io/github/license/AranSeshita/yamory-mcp-server?cacheSeconds=300)](https://github.com/AranSeshita/yamory-mcp-server/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/AranSeshita/yamory-mcp-server/blob/main/LICENSE)
 [![CI](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AranSeshita/ac9dcd5a7dfbbbc969bbeae87134aa45/raw/coverage.json)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
 
