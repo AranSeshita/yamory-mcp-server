@@ -1,9 +1,20 @@
 {
-  "name": "yamory-mcp-server",
+  "name": "@aranseshita/yamory-mcp-server",
   "version": "1.0.0",
   "description": "MCP server for yamory vulnerability management cloud",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "yamory-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

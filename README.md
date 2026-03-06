@@ -14,7 +14,7 @@ Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerabili
 
 ### Prerequisites
 
-- Docker installed and running
+- Node.js 22+ (for npx) or Docker
 - yamory API token (generate from yamory team settings, select "API サーバー" as usage scope)
 
 ### Claude Code
@@ -22,7 +22,7 @@ Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerabili
 ```bash
 claude mcp add yamory \
   --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
-  -- docker run -i --rm -e YAMORY_API_TOKEN ghcr.io/your-org/yamory-mcp-server
+  -- npx @aranseshita/yamory-mcp-server@latest
 ```
 
 ### Claude Desktop
@@ -33,12 +33,8 @@ Add to `claude_desktop_config.json`:
 {
   "mcpServers": {
     "yamory": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "YAMORY_API_TOKEN",
-        "ghcr.io/your-org/yamory-mcp-server"
-      ],
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
       "env": {
         "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
       }
@@ -56,12 +52,8 @@ Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "yamory": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "YAMORY_API_TOKEN",
-        "ghcr.io/your-org/yamory-mcp-server"
-      ],
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
       "env": {
         "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
       }
@@ -80,11 +72,31 @@ Add to `.vscode/mcp.json`:
 {
   "servers": {
     "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": {
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Using Docker instead of npx</strong></summary>
+
+Replace `npx` examples with:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
       "command": "docker",
       "args": [
         "run", "-i", "--rm",
         "-e", "YAMORY_API_TOKEN",
-        "ghcr.io/your-org/yamory-mcp-server"
+        "ghcr.io/aranseshita/yamory-mcp-server"
       ],
       "env": {
         "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
@@ -95,7 +107,7 @@ Add to `.vscode/mcp.json`:
 ```
 </details>
 
-> **Security team tokens**: Add `-e YAMORY_TEAM_NAME` to args and `"YAMORY_TEAM_NAME": "<TEAM>"` to env to filter by team, or set `*` for organization-wide access.
+> **Security team tokens**: Add `"YAMORY_TEAM_NAME": "<TEAM>"` to env to filter by team, or set `*` for organization-wide access.
 
 ---
 
@@ -246,18 +258,17 @@ yamory API Response (already scoped by token)
 
 ## Releases
 
-Container images are automatically published to GitHub Container Registry on every tagged release.
+Published to npm. Use with `npx @aranseshita/yamory-mcp-server@latest` — no install required.
 
 ```bash
-docker pull ghcr.io/your-org/yamory-mcp-server:latest
-docker pull ghcr.io/your-org/yamory-mcp-server:1.0.0
+# Or install globally
+npm install -g @aranseshita/yamory-mcp-server
 ```
 
-To create a new release:
+Docker images are also available on GitHub Container Registry:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+docker pull ghcr.io/aranseshita/yamory-mcp-server:latest
 ```
 
 ---
@@ -283,13 +294,11 @@ npx @modelcontextprotocol/inspector node dist/index.js
 yamory-mcp-server/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml            # Build check on PR/push
-│       └── release.yml       # Docker image publish on tag
+│       └── ci.yml            # Build check on PR/push
 ├── src/
 │   └── index.ts              # MCP server
 ├── package.json
 ├── tsconfig.json
-├── Dockerfile
 ├── .env.example
 ├── CONTRIBUTING.md
 ├── SECURITY.md
@@ -304,7 +313,8 @@ yamory-mcp-server/
 ### v1 (Current)
 - [x] App library vulnerability search
 - [x] Scope filter (token-based / team / project group / organization-wide)
-- [x] GitHub Actions CI / Release to ghcr.io
+- [x] npm publish / npx support
+- [x] GitHub Actions CI / Docker image on ghcr.io
 - [ ] Container image vulnerability search
 - [ ] Server Instructions
 
