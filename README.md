@@ -21,7 +21,7 @@ Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerabili
 ### Prerequisites
 
 - Node.js 22+ (for npx) or Docker
-- yamory API token (generate from yamory team settings, select "API サーバー" as usage scope)
+- yamory API token (see [Getting Your API Token](#getting-your-api-token) below)
 
 ### Claude Code
 
@@ -30,6 +30,24 @@ claude mcp add yamory \
   --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
   -- npx @aranseshita/yamory-mcp-server@latest
 ```
+
+To share the configuration with your team, add `.mcp.json` to your project root:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": {
+        "YAMORY_API_TOKEN": "${YAMORY_API_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+> Each team member sets `YAMORY_API_TOKEN` in their own environment. The `.mcp.json` file is safe to commit — it contains no secrets.
 
 ### Claude Desktop
 
@@ -114,6 +132,24 @@ Replace `npx` examples with:
 </details>
 
 > **Security team tokens**: Add `"YAMORY_TEAM_NAME": "<TEAM>"` to env to filter by team, or set `*` for organization-wide access.
+
+---
+
+## Getting Your API Token
+
+1. Log in to [yamory](https://yamory.io/)
+2. Navigate to **Team Settings** → **API Tokens**
+3. Click **Issue Token**
+4. Set the usage scope to **API Server**
+5. Copy the generated token
+
+Set it as an environment variable:
+
+```bash
+export YAMORY_API_TOKEN="your-token-here"
+```
+
+> **Tip**: Add this to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.) so it persists across sessions.
 
 ---
 
