@@ -28,4 +28,8 @@ describe("filterByScope", () => {
   it("handles empty items array", () => {
     expect(filterByScope([], "Team A")).toEqual([]);
   });
+
+  it("returns all items when teamName is not provided", () => {
+    expect(filterByScope(items)).toEqual(items);
+  });
 });

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { loadConfig } from "../src/config.js";
 
 describe("loadConfig", () => {
-  it("returns config when all required variables are set", () => {
+  it("returns config with token and team name", () => {
     const config = loadConfig({
       YAMORY_API_TOKEN: "test-token",
       YAMORY_TEAM_NAME: "my-team",
@@ -13,19 +13,15 @@ describe("loadConfig", () => {
     });
   });
 
+  it("returns config with token only (teamName is optional)", () => {
+    const config = loadConfig({ YAMORY_API_TOKEN: "token" });
+    expect(config).toEqual({
+      apiToken: "token",
+      teamName: undefined,
+    });
+  });
+
   it("throws when YAMORY_API_TOKEN is missing", () => {
-    expect(() => loadConfig({ YAMORY_TEAM_NAME: "my-team" })).toThrow(
-      "YAMORY_API_TOKEN is required"
-    );
-  });
-
-  it("throws when YAMORY_TEAM_NAME is missing", () => {
-    expect(() => loadConfig({ YAMORY_API_TOKEN: "token" })).toThrow(
-      "YAMORY_TEAM_NAME is required"
-    );
-  });
-
-  it("throws when both variables are missing", () => {
     expect(() => loadConfig({})).toThrow("YAMORY_API_TOKEN is required");
   });
 
@@ -35,5 +31,13 @@ describe("loadConfig", () => {
       YAMORY_TEAM_NAME: "*",
     });
     expect(config.teamName).toBe("*");
+  });
+
+  it("treats empty string YAMORY_TEAM_NAME as undefined", () => {
+    const config = loadConfig({
+      YAMORY_API_TOKEN: "token",
+      YAMORY_TEAM_NAME: "",
+    });
+    expect(config.teamName).toBeUndefined();
   });
 });
