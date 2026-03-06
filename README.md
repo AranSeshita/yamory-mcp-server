@@ -1,5 +1,11 @@
 # yamory MCP Server (Unofficial)
 
+[![npm version](https://img.shields.io/npm/v/@aranseshita/yamory-mcp-server)](https://www.npmjs.com/package/@aranseshita/yamory-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/@aranseshita/yamory-mcp-server)](https://www.npmjs.com/package/@aranseshita/yamory-mcp-server)
+[![License: MIT](https://img.shields.io/github/license/AranSeshita/yamory-mcp-server)](https://github.com/AranSeshita/yamory-mcp-server/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/AranSeshita/yamory-mcp-server/ci.yml?label=CI)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AranSeshita/ac9dcd5a7dfbbbc969bbeae87134aa45/raw/coverage.json)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
+
 > ⚠️ This is an **unofficial** community-driven project and is not affiliated with or endorsed by [yamory](https://yamory.io/) or Assured, Inc.
 
 Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerability management cloud. Enables AI agents and assistants to use yamory as a knowledge base for vulnerability remediation — providing **what's detected, how dangerous it is, and how to fix it**.
