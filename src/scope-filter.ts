@@ -4,8 +4,8 @@ interface HasTeamName {
 
 export function filterByScope<T extends HasTeamName>(
   items: T[],
-  teamName: string
+  teamName?: string
 ): T[] {
-  if (teamName === "*") return items;
+  if (!teamName || teamName === "*") return items;
   return items.filter((item) => item.teamName === teamName);
 }

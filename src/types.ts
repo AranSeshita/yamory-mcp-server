@@ -77,5 +77,5 @@ export interface ImageVulnSearchParams extends VulnSearchParams {
 
 export interface Config {
   apiToken: string;
-  teamName: string;
+  teamName?: string;
 }

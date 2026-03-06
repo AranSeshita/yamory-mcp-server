@@ -10,12 +10,7 @@ export function loadConfig(
     );
   }
 
-  const teamName = env.YAMORY_TEAM_NAME;
-  if (!teamName) {
-    throw new Error(
-      "YAMORY_TEAM_NAME is required. Set the target team name or '*' for organization-wide access."
-    );
-  }
+  const teamName = env.YAMORY_TEAM_NAME || undefined;
 
   return { apiToken, teamName };
 }
