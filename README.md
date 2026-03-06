@@ -202,7 +202,6 @@ Search container image vulnerabilities with filters. Same scope filtering as `se
 |----------|----------|---------|-------------|
 | `YAMORY_API_TOKEN` | **Yes** | — | API access token from yamory team settings. |
 | `YAMORY_TEAM_NAME` | No | — | Filter by team name. If unset, the token's own scope applies. Set `*` to explicitly allow all teams (for security team tokens). |
-| `YAMORY_PROJECT_GROUPS` | No | All | Comma-separated project group keys to restrict scope. |
 
 ---
 
@@ -219,13 +218,9 @@ yamory API Response (already scoped by token)
   ├─ YAMORY_TEAM_NAME = * ?
   │   └─ YES → Return as-is (explicit organization-wide)
   │
-  ├─ teamName === YAMORY_TEAM_NAME ?
-  │   ├─ YES → YAMORY_PROJECT_GROUPS set?
-  │   │         ├─ YES → projectGroupKey in list? → Return / Drop
-  │   │         └─ NO  → Return
-  │   └─ NO  → Drop
-  │
-  └─ Paging info is recalculated after filtering
+  └─ teamName === YAMORY_TEAM_NAME ?
+      ├─ YES → Return
+      └─ NO  → Drop
 ```
 
 **Typical configurations:**
