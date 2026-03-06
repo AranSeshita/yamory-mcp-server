@@ -5,144 +5,20 @@
 [![CI](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AranSeshita/ac9dcd5a7dfbbbc969bbeae87134aa45/raw/coverage.json)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
 
-> ⚠️ This is an **unofficial** community-driven project and is not affiliated with or endorsed by [yamory](https://yamory.io/) or Assured, Inc.
+> **Note**: This is an unofficial community-driven project and is not affiliated with or endorsed by [yamory](https://yamory.io/) or Assured, Inc.
 
-Model Context Protocol (MCP) server for [yamory](https://yamory.io/) vulnerability management cloud. Enables AI agents and assistants to use yamory as a knowledge base for vulnerability remediation — providing **what's detected, how dangerous it is, and how to fix it**.
-
-- **Vulnerability Search & Triage**: Search app library and container image vulnerabilities by keyword, triage level, status, CVSS score, vulnerability type, CISA KEV, and PoC availability.
-- **Scope-Based Access Control**: Team tokens automatically restrict data. Security team tokens can be further filtered by team name or used organization-wide.
-- **Works with any MCP client**: Claude Code, Claude Desktop, Cursor, VS Code, and more.
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [yamory](https://yamory.io/) vulnerability management cloud. Connects AI agents to yamory as a knowledge base — providing **what's detected, how dangerous it is, and how to fix it**.
 
 ---
 
 ## Quick Setup
 
-### Prerequisites
-
-- Node.js 22+ (for npx) or Docker
-- yamory API token (see [Getting Your API Token](#getting-your-api-token) below)
-
-### Claude Code
-
-```bash
-claude mcp add yamory \
-  --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
-  -- npx @aranseshita/yamory-mcp-server@latest
-```
-
-To share the configuration with your team, add `.mcp.json` to your project root:
-
-```json
-{
-  "mcpServers": {
-    "yamory": {
-      "command": "npx",
-      "args": ["@aranseshita/yamory-mcp-server@latest"],
-      "env": {
-        "YAMORY_API_TOKEN": "${YAMORY_API_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-> Each team member sets `YAMORY_API_TOKEN` in their own environment. The `.mcp.json` file is safe to commit — it contains no secrets.
-
-### Claude Desktop
-
-Add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "yamory": {
-      "command": "npx",
-      "args": ["@aranseshita/yamory-mcp-server@latest"],
-      "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
-      }
-    }
-  }
-}
-```
-
-<details>
-<summary><strong>Cursor</strong></summary>
-
-Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "yamory": {
-      "command": "npx",
-      "args": ["@aranseshita/yamory-mcp-server@latest"],
-      "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
-      }
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><strong>VS Code (GitHub Copilot)</strong></summary>
-
-Add to `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "yamory": {
-      "command": "npx",
-      "args": ["@aranseshita/yamory-mcp-server@latest"],
-      "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
-      }
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><strong>Using Docker instead of npx</strong></summary>
-
-Replace `npx` examples with:
-
-```json
-{
-  "mcpServers": {
-    "yamory": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "YAMORY_API_TOKEN",
-        "ghcr.io/aranseshita/yamory-mcp-server"
-      ],
-      "env": {
-        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
-      }
-    }
-  }
-}
-```
-</details>
-
-> **Security team tokens**: Add `"YAMORY_TEAM_NAME": "<TEAM>"` to env to filter by team, or set `*` for organization-wide access.
-
----
-
-## Getting Your API Token
+### 1. Get Your API Token
 
 1. Log in to [yamory](https://yamory.io/)
-2. Navigate to **Team Settings** → **API Tokens**
-3. Click **Issue Token**
-4. Set the usage scope to **API Server**
-5. Copy the generated token
-
-Set it as an environment variable:
+2. Navigate to **Team Settings** > **API Tokens**
+3. Click **Issue Token** with the usage scope set to **API Server**
+4. Set the token as an environment variable:
 
 ```bash
 export YAMORY_API_TOKEN="your-token-here"
@@ -150,175 +26,193 @@ export YAMORY_API_TOKEN="your-token-here"
 
 > **Tip**: Add this to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.) so it persists across sessions.
 
+### 2. Add to Your MCP Client
+
+**Claude Code**
+
+```bash
+claude mcp add yamory \
+  --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
+  -- npx @aranseshita/yamory-mcp-server@latest
+```
+
+**Claude Desktop** — Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": {
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+<details>
+<summary><strong>Cursor / VS Code / Docker</strong></summary>
+
+**Cursor** — Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": { "YAMORY_API_TOKEN": "<YOUR_TOKEN>" }
+    }
+  }
+}
+```
+
+**VS Code (GitHub Copilot)** — Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": { "YAMORY_API_TOKEN": "<YOUR_TOKEN>" }
+    }
+  }
+}
+```
+
+**Docker** — Replace `npx` command with:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "YAMORY_API_TOKEN", "ghcr.io/aranseshita/yamory-mcp-server"],
+      "env": { "YAMORY_API_TOKEN": "<YOUR_TOKEN>" }
+    }
+  }
+}
+```
+</details>
+
+**Team sharing (Claude Code)** — Add `.mcp.json` to your project root. Each member sets `YAMORY_API_TOKEN` in their own environment:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": { "YAMORY_API_TOKEN": "${YAMORY_API_TOKEN}" }
+    }
+  }
+}
+```
+
 ---
 
 ## What Can I Ask?
 
-yamory MCP Server serves as a **knowledge base** for your AI agent — providing vulnerability detection status, risk assessment, and remediation guidance.
+### Vulnerability Check & Remediation
 
-### Vulnerability Remediation
-
-Use yamory's scan results to identify and fix vulnerabilities. Combine with coding agents (Claude Code, GitHub Copilot, etc.) for automated remediation.
+Ask about your team's current vulnerabilities and get actionable remediation guidance. Combine with coding agents for automated fixes.
 
 ```
-「CaseStudy2 の未対応の脆弱性を見せて」
-「immediate のやつの修正方法を教えて」
-「log4j-core はどのバージョンに上げればいい？」
-「CaseStudy2 の脆弱性を修正して」           ← Agent auto-remediates with Claude Code
-```
-
-**Agent workflow:**
-```
-① search_app_vulns         → Get open app library vulnerabilities
-② search_container_vulns   → Get open container image vulnerabilities
-③ Update package.json / Dockerfile → Create PR
-```
-
-### Team Status & Reporting
-
-Get a snapshot of your team's vulnerability posture for standups, weekly reports, or audits.
-
-```
-「今月の脆弱性対応状況をまとめて」
-「immediate が放置されてるプロジェクトはある？」
-「先月と比べて未対応件数はどう変わった？」
-「RCE タイプの脆弱性で CISA KEV に該当するものは？」
+"Show me all open vulnerabilities"
+"What immediate-priority issues do we have?"
+"How do I fix the log4j vulnerability?"
+"Update the affected packages and create a PR"
 ```
 
 ### CVE Impact Analysis
 
-When a critical CVE is disclosed, immediately assess impact across your team's projects.
+When a new CVE is disclosed, instantly check if your projects are affected.
 
 ```
-「CVE-2024-XXXXX がうちのプロジェクトに影響あるか調べて」
-「この CVE に該当するパッケージを使ってるプロジェクトを全部出して」
-「影響範囲と修正方法をまとめて」
+"Is CVE-2024-XXXXX affecting any of our projects?"
+"List all projects using the vulnerable package"
+"Summarize the impact and remediation steps"
 ```
 
----
+### Reporting & Triage
 
-## Architecture
+Generate summaries for standups, audits, or security reviews.
 
-```mermaid
-flowchart LR
-    A[MCP Client] -- MCP --> B[yamory MCP Server] -- REST --> C[yamory API]
 ```
-
-**MCP Client**: Claude Code, Claude Desktop, Cursor, etc.
-**yamory MCP Server**: Scope Filter, Tools, Server Instructions
-**yamory API**: yamoryapi.yamory.io
+"Summarize this month's vulnerability status"
+"Any projects with unresolved immediate-priority issues?"
+"Show RCE vulnerabilities that are in the CISA KEV catalog"
+"How many new vulnerabilities were detected this month?"
+```
 
 ---
 
 ## Tools
 
-### 1. `search_app_vulns`
+This server provides two tools. MCP clients automatically discover all parameters — the key filters are listed below.
 
-Search app library vulnerabilities with filters. Results are automatically scoped.
+### `search_app_vulns`
 
-- **Parameters:**
-  - `keyword` (string, optional): Search keyword — matches against project name, package name, CVE-ID, etc.
-  - `triageLevel` (string, optional): Comma-separated. Values: `immediate`, `delayed`, `minor`, `none`.
-  - `status` (string, optional): Comma-separated. Values: `open`, `in_progress`, `wont_fix_closed`, `not_vuln_closed`, `closed`.
-  - `vulnType` (string, optional): Values: `XSS`, `RCE`, `SQLI`, `SSRF`, `TRAVERSAL`, `DOS`, `CSRF`, `LFI`, `RFI`, `LEAK`, `CE`, `BYPASS`, `AUTHBYPASS`, `EXPOSURE`, `PRIVILEGE`, `XXE`, `SYMLINK`, `MITM`, `MALICIOUS`.
-  - `cvssScore` (string, optional): Minimum CVSS score (0–10.0).
-  - `includeKev` (boolean, optional): If true, only CISA KEV vulnerabilities.
-  - `includePoc` (boolean, optional): If true, only vulnerabilities with PoC.
-  - `openTimestamp` (string, optional): Detected after this date. Format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ssZ` (UTC).
-  - `page` (integer, optional, default: 0): Page number (0-indexed).
-  - `size` (integer, optional, default: 100, max: 10000): Results per page.
+Search app library (npm, Maven, pip, etc.) vulnerabilities.
 
-### 2. `search_container_vulns` 🚧
+### `search_container_vulns`
 
-Search container image vulnerabilities with filters. Same scope filtering as `search_app_vulns`.
+Search container image vulnerabilities.
 
-- **Parameters:**
-  - `keyword` (string, optional): Search keyword — matches against software name, version, CVE-ID.
-  - `triageLevel` (string, optional): Comma-separated. Values: `immediate`, `delayed`, `minor`, `none`.
-  - `status` (string, optional): Comma-separated. Values: `open`, `in_progress`, `wont_fix_closed`, `not_vuln_closed`, `closed`.
-  - `vulnType` (string, optional): Values: `XSS`, `RCE`, `SQLI`, `SSRF`, `TRAVERSAL`, `DOS`, `CSRF`, `LFI`, `RFI`, `LEAK`, `CE`, `BYPASS`, `AUTHBYPASS`, `EXPOSURE`, `PRIVILEGE`, `XXE`, `SYMLINK`, `MITM`, `MALICIOUS`.
-  - `cvssScore` (string, optional): Minimum CVSS score (0–10.0).
-  - `includeKev` (boolean, optional): If true, only CISA KEV vulnerabilities.
-  - `includePoc` (boolean, optional): If true, only vulnerabilities with PoC.
-  - `yamoryTags` (string, optional): Comma-separated management tags.
-  - `openTimestamp` (string, optional): Detected after this date. Format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ssZ` (UTC).
-  - `page` (integer, optional, default: 0): Page number (0-indexed).
-  - `size` (integer, optional, default: 100, max: 10000): Results per page.
+**Common filters** (both tools):
 
-> ✅ Tool 1 is implemented. 🚧 Tool 2 is planned for v1.
+| Filter | Example | Description |
+|--------|---------|-------------|
+| `keyword` | `log4j`, `CVE-2024-1234` | Match project name, package name, or CVE-ID |
+| `triageLevel` | `immediate,delayed` | Triage priority |
+| `status` | `open` | Vulnerability status |
+| `vulnType` | `RCE`, `XSS`, `SQLI` | Vulnerability category |
+| `cvssScore` | `9.0` | Minimum CVSS score |
+| `includeKev` | `true` | CISA Known Exploited Vulnerabilities only |
+| `includePoc` | `true` | Only vulnerabilities with public PoC |
+| `openTimestamp` | `2024-01-01` | Detected after this date |
+
+> You don't need to remember these — just describe what you're looking for in natural language, and the AI agent will select the right filters.
 
 ---
 
-## Environment Variables
+## Configuration
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `YAMORY_API_TOKEN` | **Yes** | — | API access token from yamory team settings. |
-| `YAMORY_TEAM_NAME` | No | — | Filter by team name. If unset, the token's own scope applies. Set `*` to explicitly allow all teams (for security team tokens). |
+### Environment Variables
 
----
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `YAMORY_API_TOKEN` | Yes | API token from yamory team settings |
+| `YAMORY_TEAM_NAME` | No | Filter by team name. Set `*` for organization-wide access (security team tokens only) |
 
-## Scope Filter
+### Scope Filter
 
-yamory API tokens issued per team automatically restrict data to that team. The MCP server adds an optional additional filter layer.
+yamory API tokens are scoped per team. `YAMORY_TEAM_NAME` adds an optional additional filter:
 
-```
-yamory API Response (already scoped by token)
-  │
-  ├─ YAMORY_TEAM_NAME unset?
-  │   └─ YES → Return as-is (token scope only)
-  │
-  ├─ YAMORY_TEAM_NAME = * ?
-  │   └─ YES → Return as-is (explicit organization-wide)
-  │
-  └─ teamName === YAMORY_TEAM_NAME ?
-      ├─ YES → Return
-      └─ NO  → Drop
-```
+| Scenario | Token | `YAMORY_TEAM_NAME` | Result |
+|----------|-------|--------------------|--------|
+| Developer | Team token | _(unset)_ | Own team's data only |
+| Security lead, one team | Security token | `Dev Team` | Filtered to specified team |
+| Security lead, org-wide | Security token | `*` | All teams visible |
 
-**Typical configurations:**
+### Security
 
-| Scenario | Token | YAMORY_TEAM_NAME | Result |
-|----------|-------|------------------|--------|
-| Developer | Team token | (unset) | Team data only (token-scoped) |
-| Security lead, specific team | Security team token | `開発チーム` | Filtered to one team |
-| Security lead, org-wide | Security team token | `*` | All teams visible |
+- **Never commit tokens** to version control
+- **Use environment variables** or `.mcp.json` with `${YAMORY_API_TOKEN}` syntax
+- **Restrict scope** with `YAMORY_TEAM_NAME` when possible
+- **Rotate tokens** periodically from yamory team settings
 
 ---
 
-## Security Best Practices
-
-> 🔒 Your yamory API token is a sensitive credential.
-
-- **Never commit tokens** to version control.
-- **Use environment variables** — avoid hardcoding tokens in command-line arguments.
-- **Restrict scope** — for security team tokens, set `YAMORY_TEAM_NAME` to limit data exposure. Use `*` only when organization-wide access is intentional.
-- **Rotate tokens** periodically from yamory's team settings.
-
----
-
-## Releases
-
-Published to npm. Use with `npx @aranseshita/yamory-mcp-server@latest` — no install required.
-
-```bash
-# Or install globally
-npm install -g @aranseshita/yamory-mcp-server
-```
-
-Docker images are also available on GitHub Container Registry:
-
-```bash
-docker pull ghcr.io/aranseshita/yamory-mcp-server:latest
-```
-
----
-
-## Local Development
+## Development
 
 ```bash
 npm install
-npm run dev
+npm run build
+npm test
 ```
 
 Debug with MCP Inspector:
@@ -329,60 +223,31 @@ npx @modelcontextprotocol/inspector node dist/index.js
 
 ---
 
-## Project Structure
-
-```
-yamory-mcp-server/
-├── .github/
-│   └── workflows/
-│       └── ci.yml            # Build check on PR/push
-├── src/
-│   └── index.ts              # MCP server
-├── package.json
-├── tsconfig.json
-├── .env.example
-├── CONTRIBUTING.md
-├── SECURITY.md
-├── LICENSE                    # MIT
-└── README.md
-```
-
----
-
 ## Roadmap
 
-### v1 (Current) ✅
+### v1 (Current)
 - [x] App library vulnerability search
 - [x] Container image vulnerability search
-- [x] Scope filter (token-based / team / project group / organization-wide)
-- [x] Server Instructions
-- [x] npm publish / npx support
-- [x] GitHub Actions CI / Docker image on ghcr.io
+- [x] Scope filter (token / team / organization-wide)
+- [x] npm + Docker distribution
 
 ### v2
-- [ ] CVE detail tool (`get_cve`)
-- [ ] CSPM endpoints
-- [ ] Host vulnerability endpoints
-- [ ] Software listing & detail
-- [ ] Container image listing & detail
-- [ ] IT asset endpoints
+- [ ] CVE detail tool
+- [ ] CSPM / Host vulnerability endpoints
+- [ ] Software & container image listing
 
 ---
 
 ## References
 
 - [yamory](https://yamory.io/) — Vulnerability management cloud
-- [yamory API Documentation](https://docs.yamory.io/)
+- [yamory API Documentation](https://docs.yamory.io/2da5d37036fb48a6a05ea76908ddc713)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 
----
-
 ## License
 
-Licensed under MIT — see [LICENSE](LICENSE) file.
-
----
+MIT — see [LICENSE](LICENSE).
 
 ## Disclaimer
 
