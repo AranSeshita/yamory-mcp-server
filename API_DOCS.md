@@ -141,15 +141,68 @@ pageNumber: integer     // 現在のページ番号（0始まり）
 
 ---
 
-## アプリ vs コンテナ 差分まとめ
+## 3. ホストの脆弱性情報一覧
 
-| 項目 | アプリ (`/v1/app-vulns`) | コンテナ (`/v1/image-vulns`) |
-|------|------------------------|---------------------------|
-| keyword対象 | PJグループ、PJ名、グループID等 | ソフトウェア名、バージョン、CVE番号 |
-| 固有パラメータ | — | `yamoryTags` |
-| スコープフィルタキー | `teamName` + `projectGroupKey` | `teamName` のみ（PJグループなし） |
-| パッケージ名 | `packageName` | `packageNameAndVer`（バージョン含む） |
-| 修正バージョン | `solution` に含まれる | `fixedVersion` フィールドあり |
-| CVE-ID | `referenceId` | `ovalTitle` に含まれる |
-| triageLevelの大文字小文字 | `IMMEDIATE` | `Immediate` |
-| イメージ固有情報 | なし | `imageName`, `imageTitle`, `osFamilyAndVer`, `family` |
+`GET /v1/host-vulns`
+
+### クエリパラメータ
+
+| パラメータ | 型 | 内容 |
+|-----------|-----|------|
+| keyword | string | ソフトウェア名、バージョン、ホスト名に部分一致 |
+| triageLevel | string | `immediate`, `delayed`, `minor`, `none`（カンマ区切り複数可） |
+| status | string | `open`, `in_progress`, `wont_fix_closed`, `not_vuln_closed`, `closed`（カンマ区切り複数可） |
+| yamoryTags | string | タグ（カンマ区切り複数可） |
+| includeKev | boolean | CISA KEV該当のみ |
+| includePoc | boolean | PoC存在のみ |
+| cvssScore | string | 指定値以上（0〜10.0） |
+| vulnType | string | アプリ・コンテナと同じ値 |
+| openTimestamp | datetime | 指定日時以降に検出 |
+| page | integer | ページ番号（0始まり） |
+| size | integer | 1ページの件数（最大10,000） |
+
+### レスポンス
+
+```json
+[{
+  "id": "string",                  // 脆弱性ID（yamory内で一意）
+  "triageLevel": "string",        // IMMEDIATE, DELAYED, MINOR, NONE
+  "teamName": "string",           // チーム名 ★スコープフィルタ対象
+  "status": "string",             // OPEN, IN_PROGRESS, etc.
+  "vulnTypes": "string",          // 脆弱性タイプ
+  "hostTitle": "string",          // ホストタイトル
+  "hostName": "string",           // ホスト名
+  "hostIps": ["string"],          // IPアドレス
+  "hostTags": ["string"],         // ホストタグ
+  "family": "string",             // OSファミリー（例: "Ubuntu"）
+  "osFamilyAndVer": "string",     // OSバージョン（例: "Ubuntu 14.04"）
+  "packageNameAndVer": "string",  // ソフトウェア名+バージョン
+  "openSystem": true,             // 公開設定
+  "hasPoc": true,                 // PoC有無
+  "isKev": true,                  // CISA KEV該当
+  "solution": "string",           // 対応方法 ★修正に使う
+  "fixedVersion": "string",       // 修正バージョン ★修正に使う
+  "ovalTitle": "string",          // OVALタイトル（CVE情報含む）
+  "advisorySeverity": "string",   // アドバイザリ危険度（例: "High"）
+  "definitionId": "string",       // definition ID
+  "scanTimestamp": "datetime",    // 最終スキャン日時
+  "openTimestamp": "datetime",    // 検出日時
+  "closedTimestamp": "datetime",  // 完了日時
+  "yamoryVuln": "string"          // 脆弱性詳細URL
+}]
+```
+
+---
+
+## アプリ vs コンテナ vs ホスト 差分まとめ
+
+| 項目 | アプリ (`/v1/app-vulns`) | コンテナ (`/v1/image-vulns`) | ホスト (`/v1/host-vulns`) |
+|------|------------------------|---------------------------|--------------------------|
+| keyword対象 | PJグループ、PJ名、グループID等 | ソフトウェア名、バージョン、CVE番号 | ソフトウェア名、バージョン、ホスト名 |
+| 固有パラメータ | — | `yamoryTags` | `yamoryTags` |
+| スコープフィルタキー | `teamName` + `projectGroupKey` | `teamName` のみ | `teamName` のみ |
+| パッケージ名 | `packageName` | `packageNameAndVer`（バージョン含む） | `packageNameAndVer`（バージョン含む） |
+| 修正バージョン | `solution` に含まれる | `fixedVersion` フィールドあり | `fixedVersion` フィールドあり |
+| CVE-ID | `referenceId` | `ovalTitle` に含まれる | `ovalTitle` に含まれる |
+| triageLevelの大文字小文字 | `IMMEDIATE` | `Immediate` | `IMMEDIATE` |
+| 固有情報 | `projectGroupKey`, `projectName` | `imageName`, `imageTitle`, `osFamilyAndVer`, `family` | `hostName`, `hostTitle`, `hostIps`, `hostTags`, `osFamilyAndVer`, `family` |

@@ -1,5 +1,7 @@
 import type {
   AppVuln,
+  HostVuln,
+  HostVulnSearchParams,
   ImageVuln,
   ImageVulnSearchParams,
   PaginationInfo,
@@ -29,12 +31,23 @@ export class YamoryClient {
   async searchImageVulns(
     params: ImageVulnSearchParams = {}
   ): Promise<SearchResult<ImageVuln>> {
+    return this.searchWithTags<ImageVuln>("/v1/image-vulns", params);
+  }
+
+  async searchHostVulns(
+    params: HostVulnSearchParams = {}
+  ): Promise<SearchResult<HostVuln>> {
+    return this.searchWithTags<HostVuln>("/v1/host-vulns", params);
+  }
+
+  private async searchWithTags<T>(
+    path: string,
+    params: ImageVulnSearchParams | HostVulnSearchParams
+  ): Promise<SearchResult<T>> {
     const { yamoryTags, ...rest } = params;
     const queryParams: Record<string, string> = this.buildQueryParams(rest);
     if (yamoryTags) queryParams.yamoryTags = yamoryTags;
-    return this.fetchWithPagination<ImageVuln>(
-      this.buildUrl("/v1/image-vulns", queryParams)
-    );
+    return this.fetchWithPagination<T>(this.buildUrl(path, queryParams));
   }
 
   private async search<T>(

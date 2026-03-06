@@ -25,6 +25,15 @@ function createMockClient(overrides?: Partial<YamoryClient>): YamoryClient {
         pageNumber: 0,
       },
     }),
+    searchHostVulns: vi.fn().mockResolvedValue({
+      items: [],
+      pagination: {
+        pageSize: 100,
+        totalElements: 0,
+        totalPages: 0,
+        pageNumber: 0,
+      },
+    }),
     ...overrides,
   } as YamoryClient;
 }
@@ -49,12 +58,13 @@ async function setupTestServer(
 
 describe("MCP Server", () => {
   describe("tool listing", () => {
-    it("exposes search_app_vulns and search_container_vulns tools", async () => {
+    it("exposes all three vulnerability search tools", async () => {
       const { client } = await setupTestServer(createMockClient());
       const { tools } = await client.listTools();
       const names = tools.map((t) => t.name);
       expect(names).toContain("search_app_vulns");
       expect(names).toContain("search_container_vulns");
+      expect(names).toContain("search_host_vulns");
     });
   });
 
@@ -182,6 +192,61 @@ describe("MCP Server", () => {
           yamoryTags: "prod",
         })
       );
+    });
+  });
+
+  describe("search_host_vulns", () => {
+    it("calls searchHostVulns with params", async () => {
+      const searchHostVulns = vi.fn().mockResolvedValue({
+        items: [],
+        pagination: {
+          pageSize: 100,
+          totalElements: 0,
+          totalPages: 0,
+          pageNumber: 0,
+        },
+      });
+      const mockYamory = createMockClient({ searchHostVulns });
+
+      const { client } = await setupTestServer(mockYamory);
+      await client.callTool({
+        name: "search_host_vulns",
+        arguments: { keyword: "openssl", yamoryTags: "production" },
+      });
+
+      expect(searchHostVulns).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keyword: "openssl",
+          yamoryTags: "production",
+        })
+      );
+    });
+
+    it("filters results by team scope", async () => {
+      const searchHostVulns = vi.fn().mockResolvedValue({
+        items: [
+          { id: "1", teamName: "TestTeam", hostName: "host-a" },
+          { id: "2", teamName: "OtherTeam", hostName: "host-b" },
+        ],
+        pagination: {
+          pageSize: 100,
+          totalElements: 2,
+          totalPages: 1,
+          pageNumber: 0,
+        },
+      });
+      const mockYamory = createMockClient({ searchHostVulns });
+
+      const { client } = await setupTestServer(mockYamory, "TestTeam");
+      const result = await client.callTool({
+        name: "search_host_vulns",
+        arguments: {},
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const parsed = JSON.parse(content[0].text);
+      expect(parsed.items).toHaveLength(1);
+      expect(parsed.items[0].hostName).toBe("host-a");
     });
   });
 });

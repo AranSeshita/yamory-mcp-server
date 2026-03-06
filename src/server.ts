@@ -97,6 +97,7 @@ export function createServer(deps: {
         "Default behavior when the user asks about vulnerabilities without specific filters:",
         "- Use triageLevel=immediate,delayed and status=open to focus on actionable vulnerabilities.",
         "- Search both app library (search_app_vulns) and container image (search_container_vulns) vulnerabilities.",
+        "- Search host (search_host_vulns) vulnerabilities when the user asks about host or OS-level vulnerabilities.",
         "- If the user explicitly specifies filters, respect their request and override the defaults.",
       ].join("\n"),
     }
@@ -131,6 +132,27 @@ export function createServer(deps: {
     },
     async (params) => {
       const result = await yamoryClient.searchImageVulns(params);
+      result.items = filterByScope(result.items, config.teamName);
+      return {
+        content: [{ type: "text", text: formatSearchResult(result) }],
+      };
+    }
+  );
+
+  server.registerTool(
+    "search_host_vulns",
+    {
+      description: "Search host vulnerabilities detected by yamory. Returns triage level, status, affected host/package, solution, and advisory information. Results are scoped to the configured team.",
+      inputSchema: {
+        ...vulnSearchSchema,
+        yamoryTags: z
+          .string()
+          .optional()
+          .describe("Comma-separated management tags"),
+      },
+    },
+    async (params) => {
+      const result = await yamoryClient.searchHostVulns(params);
       result.items = filterByScope(result.items, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],

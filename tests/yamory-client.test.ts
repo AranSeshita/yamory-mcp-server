@@ -138,4 +138,33 @@ describe("YamoryClient", () => {
       expect(url.searchParams.get("yamoryTags")).toBe("prod,staging");
     });
   });
+
+  describe("searchHostVulns", () => {
+    it("sends request to host-vulns endpoint", async () => {
+      const mockFetch = createMockFetch([]);
+      const client = new YamoryClient({
+        apiToken: "tok",
+        fetchFn: mockFetch,
+      });
+
+      await client.searchHostVulns({ keyword: "openssl" });
+
+      const url = new URL(mockFetch.mock.calls[0][0]);
+      expect(url.pathname).toBe("/v1/host-vulns");
+      expect(url.searchParams.get("keyword")).toBe("openssl");
+    });
+
+    it("includes yamoryTags param", async () => {
+      const mockFetch = createMockFetch([]);
+      const client = new YamoryClient({
+        apiToken: "tok",
+        fetchFn: mockFetch,
+      });
+
+      await client.searchHostVulns({ yamoryTags: "production" });
+
+      const url = new URL(mockFetch.mock.calls[0][0]);
+      expect(url.searchParams.get("yamoryTags")).toBe("production");
+    });
+  });
 });

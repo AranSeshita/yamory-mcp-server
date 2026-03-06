@@ -152,7 +152,7 @@ Generate summaries for standups, audits, or security reviews.
 
 ## Tools
 
-This server provides two tools. MCP clients automatically discover all parameters — the key filters are listed below.
+This server provides three tools. MCP clients automatically discover all parameters — the key filters are listed below.
 
 ### `search_app_vulns`
 
@@ -162,7 +162,11 @@ Search app library (npm, Maven, pip, etc.) vulnerabilities.
 
 Search container image vulnerabilities.
 
-**Common filters** (both tools):
+### `search_host_vulns`
+
+Search host (OS-level) vulnerabilities.
+
+**Common filters** (all tools):
 
 | Filter | Example | Description |
 |--------|---------|-------------|
@@ -228,12 +232,13 @@ npx @modelcontextprotocol/inspector node dist/index.js
 ### v1 (Current)
 - [x] App library vulnerability search
 - [x] Container image vulnerability search
+- [x] Host vulnerability search
 - [x] Scope filter (token / team / organization-wide)
 - [x] npm + Docker distribution
 
 ### v2
 - [ ] CVE detail tool
-- [ ] CSPM / Host vulnerability endpoints
+- [ ] CSPM vulnerability endpoints
 - [ ] Software & container image listing
 
 ---

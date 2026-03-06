@@ -71,7 +71,38 @@ export interface VulnSearchParams {
   size?: number;
 }
 
+export interface HostVuln {
+  id: string;
+  triageLevel: string;
+  status: string;
+  vulnTypes: string;
+  teamName: string;
+  hostTitle: string;
+  hostName: string;
+  hostIps: string[];
+  hostTags: string[];
+  family: string;
+  osFamilyAndVer: string;
+  packageNameAndVer: string;
+  openSystem: boolean;
+  hasPoc: boolean;
+  isKev: boolean;
+  solution: string;
+  fixedVersion: string;
+  ovalTitle: string;
+  advisorySeverity: string | null;
+  definitionId: string;
+  scanTimestamp: string;
+  openTimestamp: string;
+  closedTimestamp: string | null;
+  yamoryVuln: string;
+}
+
 export interface ImageVulnSearchParams extends VulnSearchParams {
+  yamoryTags?: string;
+}
+
+export interface HostVulnSearchParams extends VulnSearchParams {
   yamoryTags?: string;
 }
 
