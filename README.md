@@ -152,7 +152,11 @@ Generate summaries for standups, audits, or security reviews.
 
 ## Tools
 
-This server provides four tools. MCP clients automatically discover all parameters — the key filters are listed below.
+This server provides five tools. MCP clients automatically discover all parameters — the key filters are listed below.
+
+### `search_vulns` (recommended default)
+
+Search app library and container image vulnerabilities in a single call. Results are grouped by source type (`app` / `container`).
 
 ### `search_app_vulns`
 

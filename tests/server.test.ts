@@ -67,14 +67,75 @@ async function setupTestServer(
 
 describe("MCP Server", () => {
   describe("tool listing", () => {
-    it("exposes all four vulnerability search tools", async () => {
+    it("exposes all five vulnerability search tools", async () => {
       const { client } = await setupTestServer(createMockClient());
       const { tools } = await client.listTools();
       const names = tools.map((t) => t.name);
+      expect(names).toContain("search_vulns");
       expect(names).toContain("search_app_vulns");
       expect(names).toContain("search_container_vulns");
       expect(names).toContain("search_asset_vulns");
       expect(names).toContain("search_host_vulns");
+    });
+  });
+
+  describe("search_vulns", () => {
+    it("calls both searchAppVulns and searchImageVulns", async () => {
+      const searchAppVulns = vi.fn().mockResolvedValue({
+        items: [{ id: "app-1", teamName: "TestTeam" }],
+        pagination: { pageSize: 100, totalElements: 1, totalPages: 1, pageNumber: 0 },
+      });
+      const searchImageVulns = vi.fn().mockResolvedValue({
+        items: [{ id: "img-1", teamName: "TestTeam" }],
+        pagination: { pageSize: 100, totalElements: 1, totalPages: 1, pageNumber: 0 },
+      });
+      const mockYamory = createMockClient({ searchAppVulns, searchImageVulns });
+
+      const { client } = await setupTestServer(mockYamory);
+      const result = await client.callTool({
+        name: "search_vulns",
+        arguments: { keyword: "log4j", status: "open" },
+      });
+
+      expect(searchAppVulns).toHaveBeenCalledWith(
+        expect.objectContaining({ keyword: "log4j", status: "open" })
+      );
+      expect(searchImageVulns).toHaveBeenCalledWith(
+        expect.objectContaining({ keyword: "log4j", status: "open" })
+      );
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const parsed = JSON.parse(content[0].text);
+      expect(parsed.app.items).toHaveLength(1);
+      expect(parsed.container.items).toHaveLength(1);
+    });
+
+    it("filters both result sets by team scope", async () => {
+      const searchAppVulns = vi.fn().mockResolvedValue({
+        items: [
+          { id: "1", teamName: "TestTeam" },
+          { id: "2", teamName: "OtherTeam" },
+        ],
+        pagination: { pageSize: 100, totalElements: 2, totalPages: 1, pageNumber: 0 },
+      });
+      const searchImageVulns = vi.fn().mockResolvedValue({
+        items: [
+          { id: "3", teamName: "OtherTeam" },
+        ],
+        pagination: { pageSize: 100, totalElements: 1, totalPages: 1, pageNumber: 0 },
+      });
+      const mockYamory = createMockClient({ searchAppVulns, searchImageVulns });
+
+      const { client } = await setupTestServer(mockYamory, "TestTeam");
+      const result = await client.callTool({
+        name: "search_vulns",
+        arguments: {},
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const parsed = JSON.parse(content[0].text);
+      expect(parsed.app.items).toHaveLength(1);
+      expect(parsed.container.items).toHaveLength(0);
     });
   });
 

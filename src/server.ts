@@ -96,11 +96,43 @@ export function createServer(deps: {
         "You are connected to yamory, a vulnerability management platform.",
         "Default behavior when the user asks about vulnerabilities without specific filters:",
         "- Use triageLevel=immediate,delayed and status=open to focus on actionable vulnerabilities.",
-        "- Search both app library (search_app_vulns) and container image (search_container_vulns) vulnerabilities.",
-        "- Search host (search_host_vulns) vulnerabilities when the user asks about host or OS-level vulnerabilities.",
-        "- Search IT asset (search_asset_vulns) vulnerabilities when the user asks about IT assets (e.g., network devices, appliances).",
+        "- Use search_vulns (unified search) to query app library and container image vulnerabilities in a single call.",
+        "- Use search_host_vulns only when the user asks about host or OS-level vulnerabilities.",
+        "- Use search_asset_vulns only when the user asks about IT assets (e.g., network devices, appliances).",
+        "- Use individual tools (search_app_vulns, search_container_vulns) when the user asks about a specific vulnerability type.",
         "- If the user explicitly specifies filters, respect their request and override the defaults.",
       ].join("\n"),
+    }
+  );
+
+  server.registerTool(
+    "search_vulns",
+    {
+      description: "Search vulnerabilities across app libraries and container images in a single call. This is the recommended default tool for general vulnerability queries. Returns results grouped by source type. Results are scoped to the configured team.",
+      inputSchema: vulnSearchSchema,
+    },
+    async (params) => {
+      const [appResult, imageResult] = await Promise.all([
+        yamoryClient.searchAppVulns(params),
+        yamoryClient.searchImageVulns(params),
+      ]);
+      appResult.items = filterByScope(appResult.items, config.teamName);
+      imageResult.items = filterByScope(imageResult.items, config.teamName);
+      const response = {
+        app: {
+          summary: `Found ${appResult.pagination.totalElements} app library vulnerability(s)`,
+          items: appResult.items,
+          pagination: appResult.pagination,
+        },
+        container: {
+          summary: `Found ${imageResult.pagination.totalElements} container image vulnerability(s)`,
+          items: imageResult.items,
+          pagination: imageResult.pagination,
+        },
+      };
+      return {
+        content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
+      };
     }
   );
 
