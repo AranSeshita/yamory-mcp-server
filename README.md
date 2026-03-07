@@ -265,3 +265,172 @@ MIT — see [LICENSE](LICENSE).
 ## Disclaimer
 
 This project is an unofficial, community-driven integration. It is not affiliated with, endorsed by, or supported by yamory or Assured, Inc. "yamory" is a trademark of Assured, Inc. Use of the yamory API is subject to yamory's terms of service.
+
+---
+
+<details>
+<summary><strong>日本語 / Japanese</strong></summary>
+
+# yamory MCP Server（非公式）
+
+> **注意**: 本プロジェクトは非公式のコミュニティ主導プロジェクトであり、[yamory](https://yamory.io/) および Assured 株式会社とは一切関係ありません。
+
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io/) を利用した [yamory](https://yamory.io/) 脆弱性管理クラウド向けサーバーです。AI エージェントを yamory のナレッジベースに接続し、**何が検出されたか、どの程度危険か、どう修正すべきか**を提供します。
+
+---
+
+## クイックセットアップ
+
+### 1. API トークンの取得
+
+1. [yamory](https://yamory.io/) にログイン
+2. **チーム設定** > **API トークン** に移動
+3. 用途に **API Server** を選択して **トークンを発行** をクリック
+4. 環境変数にトークンを設定:
+
+```bash
+export YAMORY_API_TOKEN="your-token-here"
+```
+
+> **ヒント**: シェルプロファイル（`~/.zshrc`、`~/.bashrc` など）に追加すると、セッション間で保持されます。
+
+### 2. MCP クライアントへの追加
+
+**Claude Code**
+
+```bash
+claude mcp add yamory \
+  --env YAMORY_API_TOKEN=$YAMORY_API_TOKEN \
+  -- npx @aranseshita/yamory-mcp-server@latest
+```
+
+**Claude Desktop** — `claude_desktop_config.json` に追加:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": {
+        "YAMORY_API_TOKEN": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+**チーム共有 (Claude Code)** — プロジェクトルートに `.mcp.json` を追加。各メンバーは自身の環境で `YAMORY_API_TOKEN` を設定:
+
+```json
+{
+  "mcpServers": {
+    "yamory": {
+      "command": "npx",
+      "args": ["@aranseshita/yamory-mcp-server@latest"],
+      "env": { "YAMORY_API_TOKEN": "${YAMORY_API_TOKEN}" }
+    }
+  }
+}
+```
+
+---
+
+## 何を聞ける？
+
+### 脆弱性の確認と修正
+
+チームの現在の脆弱性を確認し、実行可能な修正ガイダンスを取得できます。コーディングエージェントと組み合わせて自動修正も可能です。
+
+```
+「未対応の脆弱性を一覧表示して」
+「即時対応が必要な脆弱性は？」
+「log4j の脆弱性はどう修正する？」
+「影響を受けるパッケージを更新して PR を作成して」
+```
+
+### CVE 影響分析
+
+新しい CVE が公開された際、プロジェクトへの影響を即座に確認できます。
+
+```
+「CVE-2024-XXXXX は影響ある？」
+「脆弱なパッケージを使用しているプロジェクトを一覧表示して」
+「影響と修正手順をまとめて」
+```
+
+### レポートとトリアージ
+
+定例会、監査、セキュリティレビュー向けのサマリーを生成できます。
+
+```
+「今月の脆弱性状況をまとめて」
+「即時対応の未解決問題があるプロジェクトは？」
+「CISA KEV カタログに含まれる RCE 脆弱性を表示して」
+「今月新たに検出された脆弱性は何件？」
+```
+
+---
+
+## ツール
+
+本サーバーは5つのツールを提供します。MCP クライアントが全パラメータを自動検出します。主要なフィルターは以下の通りです。
+
+| ツール | 説明 |
+|--------|------|
+| `search_vulns` | アプリライブラリとコンテナイメージの脆弱性を一括検索（推奨デフォルト） |
+| `search_app_vulns` | アプリライブラリ（npm, Maven, pip 等）の脆弱性を検索 |
+| `search_container_vulns` | コンテナイメージの脆弱性を検索 |
+| `search_host_vulns` | ホスト（OS レベル）の脆弱性を検索 |
+| `search_asset_vulns` | IT 資産（ネットワーク機器等）の脆弱性を検索 |
+
+**共通フィルター**:
+
+| フィルター | 例 | 説明 |
+|------------|-----|------|
+| `keyword` | `log4j`, `CVE-2024-1234` | プロジェクト名、パッケージ名、CVE-ID で検索 |
+| `triageLevel` | `immediate,delayed` | トリアージ優先度 |
+| `status` | `open` | 脆弱性のステータス |
+| `vulnType` | `RCE`, `XSS`, `SQLI` | 脆弱性カテゴリ |
+| `cvssScore` | `9.0` | 最低 CVSS スコア |
+| `includeKev` | `true` | CISA KEV に含まれる脆弱性のみ |
+| `includePoc` | `true` | 公開 PoC がある脆弱性のみ |
+| `openTimestamp` | `2024-01-01` | この日付以降に検出されたもの |
+
+> これらを覚える必要はありません。自然言語で検索したい内容を伝えれば、AI エージェントが適切なフィルターを選択します。
+
+---
+
+## 設定
+
+### 環境変数
+
+| 変数 | 必須 | 説明 |
+|------|------|------|
+| `YAMORY_API_TOKEN` | はい | yamory チーム設定から取得した API トークン |
+| `YAMORY_TEAM_NAME` | いいえ | チーム名でフィルタリング。組織全体にアクセスする場合は `*` を設定（セキュリティチームトークンのみ） |
+
+### スコープフィルター
+
+yamory API トークンはチーム単位でスコープが設定されます。`YAMORY_TEAM_NAME` でさらにフィルタリングできます:
+
+| シナリオ | トークン | `YAMORY_TEAM_NAME` | 結果 |
+|----------|----------|---------------------|------|
+| 開発者 | チームトークン | _（未設定）_ | 自チームのデータのみ |
+| セキュリティリード（1チーム） | セキュリティトークン | `Dev Team` | 指定チームに限定 |
+| セキュリティリード（組織全体） | セキュリティトークン | `*` | 全チーム表示 |
+
+### セキュリティ
+
+- トークンをバージョン管理に**コミットしない**
+- **環境変数**または `.mcp.json` の `${YAMORY_API_TOKEN}` 構文を使用
+- 可能な限り `YAMORY_TEAM_NAME` で**スコープを制限**
+- yamory チーム設定から定期的に**トークンをローテーション**
+
+---
+
+## 免責事項
+
+本プロジェクトは非公式のコミュニティ主導の統合です。yamory および Assured 株式会社とは一切の提携・推奨・サポート関係にありません。「yamory」は Assured 株式会社の商標です。yamory API の使用は yamory の利用規約に従います。
+
+</details>
