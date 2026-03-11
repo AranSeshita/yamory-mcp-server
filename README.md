@@ -6,6 +6,8 @@
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AranSeshita/ac9dcd5a7dfbbbc969bbeae87134aa45/raw/coverage.json)](https://github.com/AranSeshita/yamory-mcp-server/actions/workflows/ci.yml)
 
 > **Note**: This is an unofficial community-driven project and is not affiliated with or endorsed by [yamory](https://yamory.io/) or Assured, Inc.
+>
+> **日本語版は[こちら](#日本語--japanese)** / Japanese version is available at the bottom of this page.
 
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [yamory](https://yamory.io/) vulnerability management cloud. Connects AI agents to yamory as a knowledge base — providing **what's detected, how dangerous it is, and how to fix it**.
 
@@ -22,6 +24,7 @@
 
 ```bash
 export YAMORY_API_TOKEN="your-token-here"
+# export YAMORY_TEAM_NAME="your-team"     # Optional: filter by team name
 ```
 
 > **Tip**: Add this to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.) so it persists across sessions.
@@ -290,6 +293,7 @@ This project is an unofficial, community-driven integration. It is not affiliate
 
 ```bash
 export YAMORY_API_TOKEN="your-token-here"
+# export YAMORY_TEAM_NAME="your-team"     # 任意: チーム名でフィルタリング
 ```
 
 > **ヒント**: シェルプロファイル（`~/.zshrc`、`~/.bashrc` など）に追加すると、セッション間で保持されます。

@@ -5,6 +5,7 @@ import {
   hostVulnSchema,
   imageVulnSchema,
 } from "./types.js";
+import { logWarn } from "./logger.js";
 import type {
   AppVuln,
   AssetVuln,
@@ -120,6 +121,7 @@ export class YamoryClient {
       const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
         ? retryAfter * 1_000
         : RETRY_BASE_DELAY_MS * 2 ** attempt;
+      logWarn("rate_limit_retry", { attempt: attempt + 1, delayMs, url });
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 

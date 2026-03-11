@@ -15,3 +15,6 @@ We will respond within 72 hours and work with you to address the issue.
 - Use environment variables for sensitive configuration
 - Restrict `YAMORY_TEAM_NAME` to limit data exposure
 - Rotate API tokens periodically
+- Only install this server from official sources (`npm`, `ghcr.io`)
+- Verify package provenance with `npm audit signatures`
+- Audit MCP server configurations regularly — remove unused or unrecognized servers from your MCP client settings

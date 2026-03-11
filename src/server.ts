@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { YamoryClient } from "./yamory-client.js";
 import type { Config, SearchResult } from "./types.js";
 import { filterResultByScope } from "./scope-filter.js";
+import { logInfo, logError } from "./logger.js";
 
 const VULN_TYPES = [
   "XSS",
@@ -134,27 +135,34 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const [rawApp, rawImage] = await Promise.all([
-        yamoryClient.searchAppVulns(params),
-        yamoryClient.searchImageVulns(params),
-      ]);
-      const appResult = filterResultByScope(rawApp, config.teamName);
-      const imageResult = filterResultByScope(rawImage, config.teamName);
-      const response = {
-        app: {
-          summary: `Found ${appResult.pagination.totalElements} app library vulnerability(s)`,
-          items: appResult.items,
-          pagination: appResult.pagination,
-        },
-        container: {
-          summary: `Found ${imageResult.pagination.totalElements} container image vulnerability(s)`,
-          items: imageResult.items,
-          pagination: imageResult.pagination,
-        },
-      };
-      return {
-        content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
-      };
+      logInfo("tool_call", { tool: "search_vulns", params });
+      try {
+        const [rawApp, rawImage] = await Promise.all([
+          yamoryClient.searchAppVulns(params),
+          yamoryClient.searchImageVulns(params),
+        ]);
+        const appResult = filterResultByScope(rawApp, config.teamName);
+        const imageResult = filterResultByScope(rawImage, config.teamName);
+        logInfo("tool_result", { tool: "search_vulns", appItems: appResult.items.length, containerItems: imageResult.items.length });
+        const response = {
+          app: {
+            summary: `Found ${appResult.pagination.totalElements} app library vulnerability(s)`,
+            items: appResult.items,
+            pagination: appResult.pagination,
+          },
+          container: {
+            summary: `Found ${imageResult.pagination.totalElements} container image vulnerability(s)`,
+            items: imageResult.items,
+            pagination: imageResult.pagination,
+          },
+        };
+        return {
+          content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
+        };
+      } catch (error) {
+        logError("tool_error", { tool: "search_vulns", error: String(error) });
+        throw error;
+      }
     }
   );
 
@@ -165,11 +173,18 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const raw = await yamoryClient.searchAppVulns(params);
-      const result = filterResultByScope(raw, config.teamName);
-      return {
-        content: [{ type: "text", text: formatSearchResult(result) }],
-      };
+      logInfo("tool_call", { tool: "search_app_vulns", params });
+      try {
+        const raw = await yamoryClient.searchAppVulns(params);
+        const result = filterResultByScope(raw, config.teamName);
+        logInfo("tool_result", { tool: "search_app_vulns", items: result.items.length });
+        return {
+          content: [{ type: "text", text: formatSearchResult(result) }],
+        };
+      } catch (error) {
+        logError("tool_error", { tool: "search_app_vulns", error: String(error) });
+        throw error;
+      }
     }
   );
 
@@ -186,11 +201,18 @@ export function createServer(deps: {
       },
     },
     async (params) => {
-      const raw = await yamoryClient.searchImageVulns(params);
-      const result = filterResultByScope(raw, config.teamName);
-      return {
-        content: [{ type: "text", text: formatSearchResult(result) }],
-      };
+      logInfo("tool_call", { tool: "search_container_vulns", params });
+      try {
+        const raw = await yamoryClient.searchImageVulns(params);
+        const result = filterResultByScope(raw, config.teamName);
+        logInfo("tool_result", { tool: "search_container_vulns", items: result.items.length });
+        return {
+          content: [{ type: "text", text: formatSearchResult(result) }],
+        };
+      } catch (error) {
+        logError("tool_error", { tool: "search_container_vulns", error: String(error) });
+        throw error;
+      }
     }
   );
 
@@ -201,11 +223,18 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const raw = await yamoryClient.searchAssetVulns(params);
-      const result = filterResultByScope(raw, config.teamName);
-      return {
-        content: [{ type: "text", text: formatSearchResult(result) }],
-      };
+      logInfo("tool_call", { tool: "search_asset_vulns", params });
+      try {
+        const raw = await yamoryClient.searchAssetVulns(params);
+        const result = filterResultByScope(raw, config.teamName);
+        logInfo("tool_result", { tool: "search_asset_vulns", items: result.items.length });
+        return {
+          content: [{ type: "text", text: formatSearchResult(result) }],
+        };
+      } catch (error) {
+        logError("tool_error", { tool: "search_asset_vulns", error: String(error) });
+        throw error;
+      }
     }
   );
 
@@ -222,11 +251,18 @@ export function createServer(deps: {
       },
     },
     async (params) => {
-      const raw = await yamoryClient.searchHostVulns(params);
-      const result = filterResultByScope(raw, config.teamName);
-      return {
-        content: [{ type: "text", text: formatSearchResult(result) }],
-      };
+      logInfo("tool_call", { tool: "search_host_vulns", params });
+      try {
+        const raw = await yamoryClient.searchHostVulns(params);
+        const result = filterResultByScope(raw, config.teamName);
+        logInfo("tool_result", { tool: "search_host_vulns", items: result.items.length });
+        return {
+          content: [{ type: "text", text: formatSearchResult(result) }],
+        };
+      } catch (error) {
+        logError("tool_error", { tool: "search_host_vulns", error: String(error) });
+        throw error;
+      }
     }
   );
 

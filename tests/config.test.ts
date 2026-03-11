@@ -40,4 +40,21 @@ describe("loadConfig", () => {
     });
     expect(config.teamName).toBeUndefined();
   });
+
+  it("trims whitespace from token", () => {
+    const config = loadConfig({ YAMORY_API_TOKEN: "  token  " });
+    expect(config.apiToken).toBe("token");
+  });
+
+  it("throws when token is only whitespace", () => {
+    expect(() => loadConfig({ YAMORY_API_TOKEN: "   " })).toThrow(
+      "YAMORY_API_TOKEN is required"
+    );
+  });
+
+  it("throws when token contains spaces", () => {
+    expect(() =>
+      loadConfig({ YAMORY_API_TOKEN: "token with spaces" })
+    ).toThrow("YAMORY_API_TOKEN contains spaces");
+  });
 });
