@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { YamoryClient } from "./yamory-client.js";
 import type { Config, SearchResult } from "./types.js";
-import { filterByScope } from "./scope-filter.js";
+import { filterResultByScope } from "./scope-filter.js";
 
 const VULN_TYPES = [
   "XSS",
@@ -26,21 +26,37 @@ const VULN_TYPES = [
   "MALICIOUS",
 ] as const;
 
+const TRIAGE_LEVELS = ["immediate", "delayed", "minor", "none"] as const;
+const STATUSES = [
+  "open",
+  "in_progress",
+  "wont_fix_closed",
+  "not_vuln_closed",
+  "closed",
+] as const;
+
+const commaSeparatedEnum = (allowed: readonly string[]) =>
+  z
+    .string()
+    .refine(
+      (val) => val.split(",").every((v) => allowed.includes(v.trim())),
+      { message: `Allowed values: ${allowed.join(", ")}` }
+    );
+
 const vulnSearchSchema = {
   keyword: z
     .string()
+    .max(500)
     .optional()
     .describe(
       "Search keyword — matches against project name, package name, CVE-ID, etc."
     ),
-  triageLevel: z
-    .string()
+  triageLevel: commaSeparatedEnum(TRIAGE_LEVELS)
     .optional()
     .describe(
       "Comma-separated triage levels: immediate, delayed, minor, none"
     ),
-  status: z
-    .string()
+  status: commaSeparatedEnum(STATUSES)
     .optional()
     .describe(
       "Comma-separated statuses: open, in_progress, wont_fix_closed, not_vuln_closed, closed"
@@ -51,6 +67,8 @@ const vulnSearchSchema = {
     .describe("Vulnerability type filter"),
   cvssScore: z
     .string()
+    .regex(/^\d{1,2}(\.\d)?$/, "Must be a number between 0 and 10.0")
+    .refine((val) => { const n = Number.parseFloat(val); return n >= 0 && n <= 10; }, { message: "Must be between 0 and 10.0" })
     .optional()
     .describe("Minimum CVSS score (0-10.0)"),
   includeKev: z
@@ -63,6 +81,10 @@ const vulnSearchSchema = {
     .describe("If true, only vulnerabilities with PoC"),
   openTimestamp: z
     .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$/,
+      "Format: YYYY-MM-DD or YYYY-MM-DDThh:mm:ssZ"
+    )
     .optional()
     .describe(
       "Detected after this date. Format: YYYY-MM-DD or YYYY-MM-DDThh:mm:ssZ (UTC)"
@@ -112,12 +134,12 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const [appResult, imageResult] = await Promise.all([
+      const [rawApp, rawImage] = await Promise.all([
         yamoryClient.searchAppVulns(params),
         yamoryClient.searchImageVulns(params),
       ]);
-      appResult.items = filterByScope(appResult.items, config.teamName);
-      imageResult.items = filterByScope(imageResult.items, config.teamName);
+      const appResult = filterResultByScope(rawApp, config.teamName);
+      const imageResult = filterResultByScope(rawImage, config.teamName);
       const response = {
         app: {
           summary: `Found ${appResult.pagination.totalElements} app library vulnerability(s)`,
@@ -143,8 +165,8 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const result = await yamoryClient.searchAppVulns(params);
-      result.items = filterByScope(result.items, config.teamName);
+      const raw = await yamoryClient.searchAppVulns(params);
+      const result = filterResultByScope(raw, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],
       };
@@ -164,8 +186,8 @@ export function createServer(deps: {
       },
     },
     async (params) => {
-      const result = await yamoryClient.searchImageVulns(params);
-      result.items = filterByScope(result.items, config.teamName);
+      const raw = await yamoryClient.searchImageVulns(params);
+      const result = filterResultByScope(raw, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],
       };
@@ -179,8 +201,8 @@ export function createServer(deps: {
       inputSchema: vulnSearchSchema,
     },
     async (params) => {
-      const result = await yamoryClient.searchAssetVulns(params);
-      result.items = filterByScope(result.items, config.teamName);
+      const raw = await yamoryClient.searchAssetVulns(params);
+      const result = filterResultByScope(raw, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],
       };
@@ -200,8 +222,8 @@ export function createServer(deps: {
       },
     },
     async (params) => {
-      const result = await yamoryClient.searchHostVulns(params);
-      result.items = filterByScope(result.items, config.teamName);
+      const raw = await yamoryClient.searchHostVulns(params);
+      const result = filterResultByScope(raw, config.teamName);
       return {
         content: [{ type: "text", text: formatSearchResult(result) }],
       };

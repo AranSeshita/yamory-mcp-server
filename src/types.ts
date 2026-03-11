@@ -1,50 +1,103 @@
-export interface AppVuln {
-  id: string;
-  triageLevel: string;
-  status: string;
-  vulnTypes: string;
-  teamName: string;
-  projectGroupKey: string;
-  projectName: string;
-  packageName: string;
-  openSystem: boolean;
-  hasPoc: boolean;
-  isKev: boolean;
-  referenceId: string;
-  solution: string;
-  scanTimestamp: string;
-  openTimestamp: string;
-  fixStartTimestamp: string | null;
-  closedTimestamp: string | null;
-  yamoryVuln: string;
-}
+import { z } from "zod";
 
-export interface ImageVuln {
-  id: string;
-  triageLevel: string;
-  status: string;
-  vulnTypes: string;
-  teamName: string;
-  osFamilyAndVer: string;
-  family: string;
-  imageTitle: string;
-  imageName: string;
-  packageNameAndVer: string;
-  imageTags: string[];
-  openSystem: boolean;
-  hasPoc: boolean;
-  isKev: boolean;
-  solution: string;
-  ovalTitle: string;
-  advisorySeverity: string | null;
-  definitionId: string;
-  fixedVersion: string;
-  firstScanDateTime: string;
-  scanTimestamp: string;
-  openTimestamp: string;
-  closedTimestamp: string | null;
-  yamoryVuln: string;
-}
+export const appVulnSchema = z.object({
+  id: z.string(),
+  triageLevel: z.string(),
+  status: z.string(),
+  vulnTypes: z.string(),
+  teamName: z.string(),
+  projectGroupKey: z.string(),
+  projectName: z.string(),
+  packageName: z.string(),
+  openSystem: z.boolean(),
+  hasPoc: z.boolean(),
+  isKev: z.boolean(),
+  referenceId: z.string(),
+  solution: z.string(),
+  scanTimestamp: z.string(),
+  openTimestamp: z.string(),
+  fixStartTimestamp: z.string().nullable(),
+  closedTimestamp: z.string().nullable(),
+  yamoryVuln: z.string(),
+});
+export type AppVuln = z.infer<typeof appVulnSchema>;
+
+export const imageVulnSchema = z.object({
+  id: z.string(),
+  triageLevel: z.string(),
+  status: z.string(),
+  vulnTypes: z.string(),
+  teamName: z.string(),
+  osFamilyAndVer: z.string(),
+  family: z.string(),
+  imageTitle: z.string(),
+  imageName: z.string(),
+  packageNameAndVer: z.string(),
+  imageTags: z.array(z.string()),
+  openSystem: z.boolean(),
+  hasPoc: z.boolean(),
+  isKev: z.boolean(),
+  solution: z.string(),
+  ovalTitle: z.string(),
+  advisorySeverity: z.string().nullable(),
+  definitionId: z.string(),
+  fixedVersion: z.string(),
+  firstScanDateTime: z.string(),
+  scanTimestamp: z.string(),
+  openTimestamp: z.string(),
+  closedTimestamp: z.string().nullable(),
+  yamoryVuln: z.string(),
+});
+export type ImageVuln = z.infer<typeof imageVulnSchema>;
+
+export const hostVulnSchema = z.object({
+  id: z.string(),
+  triageLevel: z.string(),
+  status: z.string(),
+  vulnTypes: z.string(),
+  teamName: z.string(),
+  hostTitle: z.string(),
+  hostName: z.string(),
+  hostIps: z.array(z.string()),
+  hostTags: z.array(z.string()),
+  family: z.string(),
+  osFamilyAndVer: z.string(),
+  packageNameAndVer: z.string(),
+  openSystem: z.boolean(),
+  hasPoc: z.boolean(),
+  isKev: z.boolean(),
+  solution: z.string(),
+  fixedVersion: z.string(),
+  ovalTitle: z.string(),
+  advisorySeverity: z.string().nullable(),
+  definitionId: z.string(),
+  scanTimestamp: z.string(),
+  openTimestamp: z.string(),
+  closedTimestamp: z.string().nullable(),
+  yamoryVuln: z.string(),
+});
+export type HostVuln = z.infer<typeof hostVulnSchema>;
+
+export const assetVulnSchema = z.object({
+  id: z.string(),
+  triageLevel: z.string(),
+  status: z.string(),
+  vulnTypes: z.string(),
+  teamName: z.string(),
+  projectName: z.string(),
+  assetName: z.string(),
+  version: z.string(),
+  referenceId: z.string(),
+  assetIdentifier: z.string(),
+  openSystem: z.boolean(),
+  hasPoc: z.boolean(),
+  isKev: z.boolean(),
+  openTimestamp: z.string(),
+  closedTimestamp: z.string().nullable(),
+  scanTimestamp: z.string(),
+  yamoryVuln: z.string(),
+});
+export type AssetVuln = z.infer<typeof assetVulnSchema>;
 
 export interface PaginationInfo {
   pageSize: number;
@@ -69,53 +122,6 @@ export interface VulnSearchParams {
   openTimestamp?: string;
   page?: number;
   size?: number;
-}
-
-export interface HostVuln {
-  id: string;
-  triageLevel: string;
-  status: string;
-  vulnTypes: string;
-  teamName: string;
-  hostTitle: string;
-  hostName: string;
-  hostIps: string[];
-  hostTags: string[];
-  family: string;
-  osFamilyAndVer: string;
-  packageNameAndVer: string;
-  openSystem: boolean;
-  hasPoc: boolean;
-  isKev: boolean;
-  solution: string;
-  fixedVersion: string;
-  ovalTitle: string;
-  advisorySeverity: string | null;
-  definitionId: string;
-  scanTimestamp: string;
-  openTimestamp: string;
-  closedTimestamp: string | null;
-  yamoryVuln: string;
-}
-
-export interface AssetVuln {
-  id: string;
-  triageLevel: string;
-  status: string;
-  vulnTypes: string;
-  teamName: string;
-  projectName: string;
-  assetName: string;
-  version: string;
-  referenceId: string;
-  assetIdentifier: string;
-  openSystem: boolean;
-  hasPoc: boolean;
-  isKev: boolean;
-  openTimestamp: string;
-  closedTimestamp: string | null;
-  scanTimestamp: string;
-  yamoryVuln: string;
 }
 
 export interface ImageVulnSearchParams extends VulnSearchParams {

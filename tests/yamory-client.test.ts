@@ -39,13 +39,13 @@ describe("YamoryClient", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://yamoryapi.yamory.io/v1/app-vulns",
-        {
+        expect.objectContaining({
           method: "GET",
           headers: {
             Accept: "application/json",
             Authorization: "token test-token",
           },
-        }
+        })
       );
     });
 
@@ -75,7 +75,27 @@ describe("YamoryClient", () => {
     });
 
     it("parses pagination from response headers", async () => {
-      const mockFetch = createMockFetch([{ id: "1" }], {
+      const validAppVuln = {
+        id: "1",
+        triageLevel: "IMMEDIATE",
+        status: "OPEN",
+        vulnTypes: "RCE",
+        teamName: "TestTeam",
+        projectGroupKey: "proj1",
+        projectName: "app",
+        packageName: "log4j-core-2.14.0",
+        openSystem: true,
+        hasPoc: true,
+        isKev: true,
+        referenceId: "CVE-2021-44228",
+        solution: "Upgrade to 2.15.0",
+        scanTimestamp: "2023-01-01T00:00:00Z",
+        openTimestamp: "2023-01-01T00:00:00Z",
+        fixStartTimestamp: null,
+        closedTimestamp: null,
+        yamoryVuln: "https://yamoryapi.yamory.io/v1/app-yamoryVulns/123",
+      };
+      const mockFetch = createMockFetch([validAppVuln], {
         totalElements: "42",
         totalPages: "5",
         pageNumber: "2",
@@ -94,7 +114,7 @@ describe("YamoryClient", () => {
         pageNumber: 2,
         pageSize: 10,
       });
-      expect(result.items).toEqual([{ id: "1" }]);
+      expect(result.items).toEqual([validAppVuln]);
     });
 
     it("throws on API error", async () => {
@@ -105,7 +125,7 @@ describe("YamoryClient", () => {
       });
 
       await expect(client.searchAppVulns()).rejects.toThrow(
-        "yamory API error: 401 Unauthorized - error body"
+        "yamory API error: 401 - error body"
       );
     });
   });
