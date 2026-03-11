@@ -7,7 +7,7 @@
 
 > **Note**: This is an unofficial community-driven project and is not affiliated with or endorsed by [yamory](https://yamory.io/) or Assured, Inc.
 >
-> **日本語版は[こちら](#japanese)** / Japanese version is available at the bottom of this page.
+> **日本語版は[こちら](#日本語--japanese)** / Japanese version is available at the bottom of this page.
 
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [yamory](https://yamory.io/) vulnerability management cloud. Connects AI agents to yamory as a knowledge base — providing **what's detected, how dangerous it is, and how to fix it**.
 
@@ -271,8 +271,7 @@ This project is an unofficial, community-driven integration. It is not affiliate
 
 ---
 
-<details id="japanese">
-<summary><strong>日本語 / Japanese</strong></summary>
+## 日本語 / Japanese
 
 # yamory MCP Server（非公式）
 
@@ -436,5 +435,3 @@ yamory API トークンはチーム単位でスコープが設定されます。
 ## 免責事項
 
 本プロジェクトは非公式のコミュニティ主導の統合です。yamory および Assured 株式会社とは一切の提携・推奨・サポート関係にありません。「yamory」は Assured 株式会社の商標です。yamory API の使用は yamory の利用規約に従います。
-
-</details>
